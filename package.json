@@ -1,5 +1,5 @@
 {
-  "name": "propare",
+  "name": "ProPare",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "bootstrap": "yarn && cd ios && npx pod install && cd ../",
     "dev": "yarn adb && react-native start",
     "adb": "wd-adb",
-    "android": "adb shell pm uninstall --user 0 com.whitedigital.smart_terminal ; react-native run-android",
+    "android": "adb shell pm uninstall --user 0 com.whitedigital.propare ; react-native run-android",
     "ios": "react-native run-ios --simulator='iPhone 12 (15.0)'",
     "// --- build --- //": "",
     "// --- test --- //": "",
