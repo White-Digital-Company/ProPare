@@ -1,4 +1,4 @@
-package com.whitedigital.smart_terminal;
+package com.propare;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
