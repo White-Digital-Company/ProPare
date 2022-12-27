@@ -2,7 +2,7 @@
   "screens": {
     "home": {
       "buttons": {
-        "scan": "Scan QR-code"
+        "scan": "Skanna QR-kod"
       }
     }
   }

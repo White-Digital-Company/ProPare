@@ -3,11 +3,11 @@ import i18n, { LanguageDetectorAsyncModule } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import * as RNLocalize from 'react-native-localize'
 import translationEN from './locales/en.json'
-import translationRO from './locales/ro.json'
+import translationSE from './locales/se.json'
 
 const CACHE_LANGUAGE_KEY = 'i18n_language'
 
-const LANGUAGES = ['en', 'ru', 'uk'] as const
+const LANGUAGES = ['en', 'se'] as const
 
 export const defaultNS = 'translation'
 
@@ -20,7 +20,7 @@ const cacheUserLanguage = async (lang: Language) => {
 }
 
 export const getLanguage = () => {
-  return i18n.language
+  return i18n.language as Language
 }
 
 export const changeLanguage = async (lang: Language) => {
@@ -30,7 +30,7 @@ export const changeLanguage = async (lang: Language) => {
 
 export const resources = {
   en: { translation: translationEN },
-  ro: { translation: translationRO },
+  se: { translation: translationSE },
 } as const
 
 const languageDetector: LanguageDetectorAsyncModule = {
