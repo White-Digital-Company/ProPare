@@ -6,11 +6,16 @@ import type { RouteProp } from '@react-navigation/native'
 import HomeScreen from '@screens/Home'
 import BarcodeScreen from '@screens/Barcode'
 import ProductScreen from '@screens/Product'
+import { useTranslation } from 'react-i18next'
+import CertificationScreen from '@screens/Certification'
 
 export type RootStackParamList = {
   Home: undefined
   Barcode: undefined
   Product: {
+    barcode: string
+  }
+  Certification: {
     barcode: string
   }
 }
@@ -24,8 +29,18 @@ export type RootRouterNavigationProps<T extends keyof RootStackParamList> =
 const Stack = createStackNavigator<RootStackParamList>()
 
 const RootRouter = () => {
+  const { t } = useTranslation()
+
   return (
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#162345',
+        },
+        headerTintColor: '#fff',
+      }}
+    >
       <Stack.Screen
         name="Home"
         component={HomeScreen}
@@ -39,7 +54,12 @@ const RootRouter = () => {
       <Stack.Screen
         name="Product"
         component={ProductScreen}
-        options={{ headerShown: false }}
+        options={{ title: t('screens.product.title') }}
+      />
+      <Stack.Screen
+        name="Certification"
+        component={CertificationScreen}
+        options={{ title: '' }}
       />
     </Stack.Navigator>
   )

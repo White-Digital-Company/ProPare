@@ -1,1 +1,7 @@
-export const iconsName = ['flagUK', 'flagSE', 'arrowDown'] as const
+export const iconsName = [
+  'flagUKCircle',
+  'flagUK',
+  'flagSVCircle',
+  'flagSVCircle',
+  'arrowDown',
+] as const

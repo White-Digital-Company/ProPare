@@ -8,13 +8,14 @@ import { BarcodeFormat, useScanBarcodes } from 'vision-camera-code-scanner'
 import { useNavigation } from '@react-navigation/native'
 import type { RootRouterNavigationProps } from '@navigation/RootRouter'
 
-export const BARCODE_READER_BOX_WIDTH = wp(80)
-export const BARCODE_READER_BOX_HEIGHT = wp(40)
+export const BARCODE_READER_BOX_SIZE = wp(80)
 
 const BarcodeScreen = () => {
   const navigation = useNavigation<RootRouterNavigationProps<'Barcode'>>()
   const { back: device } = useCameraDevices()
-  const [frameProccessor, barcodes] = useScanBarcodes([BarcodeFormat.EAN_13])
+  const [frameProccessor, barcodes] = useScanBarcodes([
+    BarcodeFormat.ALL_FORMATS,
+  ])
 
   const [scanned, setScanned] = useState<boolean>(false)
 
@@ -24,8 +25,13 @@ const BarcodeScreen = () => {
 
   useEffect(() => {
     if (barcodes?.length && !scanned) {
+      let barcodeData = barcodes[0].rawValue
+      if (barcodeData?.includes('http')) {
+        const barcodeUrlArray = barcodeData.split('/')
+        barcodeData = barcodeUrlArray[barcodeUrlArray.length - 1]
+      }
       setScanned(true)
-      navigation.navigate('Product', { barcode: barcodes[0].rawValue ?? '' })
+      navigation.replace('Product', { barcode: barcodeData ?? '' })
     }
   }, [barcodes])
 
@@ -43,11 +49,11 @@ const BarcodeScreen = () => {
 
       <View style={tw.style(`absolute top-0 left-0 right-0 bottom-0`)}>
         <BarcodeMask
-          width={BARCODE_READER_BOX_WIDTH}
-          height={BARCODE_READER_BOX_HEIGHT}
+          width={BARCODE_READER_BOX_SIZE}
+          height={BARCODE_READER_BOX_SIZE}
           edgeBorderWidth={5}
           animatedLineColor={tw`text-dark_blue`['color'] as string}
-          animatedLineWidth={BARCODE_READER_BOX_WIDTH}
+          animatedLineWidth={BARCODE_READER_BOX_SIZE}
           edgeColor={tw`text-dark_blue`['color'] as string}
         />
       </View>

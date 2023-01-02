@@ -1,0 +1,600 @@
+import { productApi } from '@api'
+import type {
+  Link,
+  ProductLinksSetResponse,
+  ProductLink,
+  RemoteProductData,
+  PipData,
+  ProductData,
+} from '@models/product'
+// @ts-ignore
+import DOMParser from 'react-native-html-parser'
+
+export const AVAILABLE_LANGUAGES: ['en', 'sv'] = ['en', 'sv']
+
+export const PIP_KEYS = [
+  'brand',
+  'subbrand',
+  'owner',
+  'productName',
+  'packageSize',
+  'packageDepth',
+  'packageHeight',
+  'packageWidth',
+  'grossWeight',
+  'countryOfOriginStatement',
+  'image',
+  'markedLabel',
+]
+
+export const REQUIRED_PIP_KEY = ['brand', 'owner', 'productName', 'image']
+
+export const getProductDataLinks = (
+  data: ProductLinksSetResponse,
+  barcode: string,
+) => {
+  const productLinks: { pip: ProductLink; certification: ProductLink } = {
+    pip: {
+      en: '',
+      sv: '',
+    },
+    certification: {
+      en: '',
+      sv: '',
+    },
+  }
+  for (const links of data.linkset) {
+    if (links.anchor.includes(barcode)) {
+      console.log('links', links)
+      for (const [key, value] of Object.entries(links)) {
+        if (key === `https://gs1.org/voc/pip`) {
+          console.log('value', value)
+          const pipLinks = value.filter(
+            (link: Link) =>
+              !link.hreflang ||
+              link.hreflang.some(
+                (lang: string) => lang === 'en' || lang === 'sv',
+              ),
+          )
+
+          productLinks.pip = Object.fromEntries(
+            pipLinks.map((link: Link) => [
+              link.hreflang ? link.hreflang[0] : 'en',
+              link.href,
+            ]),
+          ) as ProductLink
+        }
+
+        if (key === `https://gs1.org/voc/certificationInfo`) {
+          const pipLinks = value.filter(
+            (link: Link) =>
+              !link.hreflang ||
+              link.hreflang.some(
+                (lang: string) => lang === 'en' || lang === 'sv',
+              ),
+          )
+
+          productLinks.certification = Object.fromEntries(
+            pipLinks.map((link: Link) => [
+              link.hreflang ? link.hreflang[0] : 'en',
+              link.href,
+            ]),
+          ) as ProductLink
+        }
+      }
+    }
+  }
+
+  if (!productLinks.pip.sv) {
+    productLinks.pip.sv = productLinks.pip.en
+  }
+
+  return productLinks
+}
+
+export const getProductInfoByGSLink = async (
+  links: ProductLink,
+): Promise<RemoteProductData> => {
+  const parser = new DOMParser.DOMParser()
+
+  const productData = {}
+
+  for (const [key, value] of Object.entries(links)) {
+    const inputPipData = [
+      await productApi.getProductDataByLink(value),
+      await productApi
+        .getProductDataByLink(`${value}/pip_example.html`)
+        .catch(() => null),
+    ].map(data => {
+      if (!data) {
+        return data
+      }
+
+      if (typeof data === 'string') {
+        const parsed = parser.parseFromString(data, 'text/html')
+        const scriptData = parsed.querySelect(
+          'script=[type="application/ld+json"]',
+        )
+        try {
+          const parsedData = JSON.parse(scriptData[0].childNodes['0'].data)
+          return parsedData
+        } catch (error) {
+          console.log('parse error:', error)
+          return null
+        }
+      }
+
+      return data
+    })
+
+    Object.assign(productData, { [key]: inputPipData })
+  }
+
+  return productData as RemoteProductData
+}
+
+export const getPipDataByProductInfo = (data: any[]): ProductData => {
+  const pipDataArr = data.map(pip => {
+    if (!pip) {
+      return null
+    }
+
+    if (
+      pip['@type'] === 'gs1:Product' ||
+      pip['@type'].includes('gs1:Product') ||
+      pip['@type'] === 's:Product' ||
+      pip['@type'].includes('s:Product')
+    ) {
+      return getProductDataByType(pip)
+    }
+
+    if (pip['@type'] === 'gs1:Offer' || pip['@type'].includes('gs1:Offer')) {
+      return getProductDataByType(pip.itemOffered)
+    }
+
+    return null
+  })
+
+  return connectProductDataArrToPip(pipDataArr)
+}
+
+export const connectProductDataArrToPip = (data: any[]) => {
+  const firstPip = data[0]
+  const secondPip = data[1]
+
+  if (!firstPip && !secondPip) {
+    return null
+  }
+
+  if (!firstPip && secondPip) {
+    return secondPip
+  }
+
+  if (firstPip && !secondPip) {
+    return firstPip
+  }
+
+  const productPip: { en: PipData; sv: PipData } = {
+    en: {},
+    sv: {},
+  }
+
+  for (const key of PIP_KEYS) {
+    for (const lang of AVAILABLE_LANGUAGES) {
+      const firstValue = firstPip[lang][key]
+      const secondValue = secondPip[lang][key]
+
+      if (!firstValue && secondValue) {
+        Object.assign(productPip[lang], { [key]: secondValue })
+      }
+
+      if (firstValue && !secondValue) {
+        Object.assign(productPip[lang], { [key]: firstValue })
+      }
+
+      if (firstValue && secondValue) {
+        Object.assign(productPip[lang], { [key]: firstValue })
+      }
+    }
+  }
+
+  return productPip
+}
+
+export const getProductDataByType = (pip: any) => {
+  if (pip['@type'] === 'gs1:Product' || pip['@type'].includes('gs1:Product')) {
+    return mapProductWithTypeGS(pip)
+  }
+
+  if (pip['@type'] === 's:Product' || pip['@type'].includes('s:Product')) {
+    return mapProductWithTypeS(pip)
+  }
+
+  if (
+    pip['@type'] === 'gs1:FoodBeverageTobaccoProduct' ||
+    pip['@type'].includes('gs1:FoodBeverageTobaccoProduct')
+  ) {
+    return mapProductWithTypeTobaccoProduct(pip)
+  }
+}
+
+export const mapProductWithTypeGS = (pipData: any) => {
+  const productPip: any = {
+    en: {},
+    sv: {},
+  }
+
+  console.log('pipData', JSON.stringify(pipData))
+
+  if (pipData.brand) {
+    if (pipData.brand.brandName) {
+      const pipBrands = pipData.brand.brandName.filter((brands: any) =>
+        AVAILABLE_LANGUAGES.includes(brands['@language']),
+      )
+
+      for (const brand of pipBrands) {
+        const lang = brand['@language']
+        const value = brand['@value']
+
+        Object.assign(productPip[lang], { brand: value ? value : '' })
+      }
+    }
+    if (pipData.brand.subBrandName) {
+      const pipSubBrands = pipData.brand.subBrandName.filter((subbrands: any) =>
+        AVAILABLE_LANGUAGES.includes(subbrands['@language']),
+      )
+
+      for (const subbrand of pipSubBrands) {
+        const lang = subbrand['@language']
+        const value = subbrand['@value']
+
+        Object.assign(productPip[lang], { subbrand: value ? value : '' })
+      }
+    }
+  }
+
+  if (
+    pipData.brandOwner &&
+    pipData.brandOwner.organizationName &&
+    pipData.brandOwner.organizationName.length > 0
+  ) {
+    const pipBrandOwners = pipData.brandOwner.organizationName.filter(
+      (owners: any) => AVAILABLE_LANGUAGES.includes(owners['@language']),
+    )
+
+    for (const owner of pipBrandOwners) {
+      const lang = owner['@language']
+      const value = owner['@value']
+
+      Object.assign(productPip[lang], { owner: value ? value : '' })
+    }
+  }
+
+  if (pipData.productName) {
+    const lang = pipData.productName['@language']
+    const value = pipData.productName['@value']
+
+    Object.assign(productPip[lang], {
+      productName: value ? value : '',
+    })
+  }
+
+  if (pipData.inPackageDepth) {
+    Object.assign(productPip['en'], {
+      packageDepth: `${pipData.inPackageDepth.value['@value']} ${pipData.inPackageDepth.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      packageDepth: `${pipData.inPackageDepth.value['@value']} ${pipData.inPackageDepth.unitCode}`,
+    })
+  }
+
+  if (pipData.inPackageHeight) {
+    Object.assign(productPip['en'], {
+      packageHeight: `${pipData.inPackageHeight.value['@value']} ${pipData.inPackageHeight.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      packageHeight: `${pipData.inPackageHeight.value['@value']} ${pipData.inPackageHeight.unitCode}`,
+    })
+  }
+
+  if (pipData.inPackageWidth) {
+    Object.assign(productPip['en'], {
+      packageWidth: `${pipData.inPackageWidth.value['@value']} ${pipData.inPackageWidth.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      packageWidth: `${pipData.inPackageWidth.value['@value']} ${pipData.inPackageWidth.unitCode}`,
+    })
+  }
+
+  if (pipData.grossWeight) {
+    Object.assign(productPip['en'], {
+      grossWeight: `${pipData.grossWeight.value['@value']} ${pipData.grossWeight.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      grossWeight: `${pipData.grossWeight.value['@value']} ${pipData.grossWeight.unitCode}`,
+    })
+  }
+
+  if (
+    pipData.countryOfOriginStatement &&
+    pipData.countryOfOriginStatement.length > 0
+  ) {
+    const countries = pipData.countryOfOriginStatement.filter((country: any) =>
+      AVAILABLE_LANGUAGES.includes(country['@language']),
+    )
+
+    for (const country of countries) {
+      const lang = country['@language']
+      const value = country['@value']
+
+      Object.assign(productPip[lang], {
+        countryOfOriginStatement: value ? value : '',
+      })
+    }
+  }
+  if (pipData.image) {
+    Object.assign(productPip['en'], {
+      image: pipData.image.referencedFileURL,
+    })
+    Object.assign(productPip['sv'], {
+      image: pipData.image.referencedFileURL,
+    })
+  }
+
+  if (pipData.packagingMarkedLabelAccreditation) {
+    const value = pipData.packagingMarkedLabelAccreditation['@value']
+
+    Object.assign(productPip['en'], {
+      markedLabel: value ? value : '',
+    })
+    Object.assign(productPip['sv'], {
+      markedLabel: value ? value : '',
+    })
+  }
+
+  return productPip
+}
+
+export const mapProductWithTypeS = (pipData: any) => {
+  const productPip: any = {
+    en: {},
+    sv: {},
+  }
+
+  if (pipData['s:name'] && pipData['s:name'].length > 0) {
+    const pipNames = pipData['s:name'].filter((names: any) =>
+      AVAILABLE_LANGUAGES.includes(names['@language']),
+    )
+
+    for (const name of pipNames) {
+      const lang = name['@language']
+      const value = name['@value']
+
+      Object.assign(productPip[lang], { productName: value ? value : '' })
+    }
+  }
+
+  if (pipData['s:brand']) {
+    const value = pipData['s:brand']['s:name']
+
+    Object.assign(productPip['en'], { brand: value ? value : '' })
+    Object.assign(productPip['sv'], { brand: value ? value : '' })
+  }
+
+  if (pipData['s:image']) {
+    const value = pipData['s:image']['s:url']['@id']
+
+    Object.assign(productPip['en'], { image: value ? value : '' })
+    Object.assign(productPip['sv'], { image: value ? value : '' })
+  }
+
+  if (pipData['s:size']) {
+    const value = pipData['s:size']['s:value']
+    const unit = pipData['s:weighsizet']['s:unitText']
+
+    Object.assign(productPip['en'], { packageSize: `${value} ${unit}` })
+    Object.assign(productPip['sv'], { packageSize: `${value} ${unit}` })
+  }
+
+  if (pipData['s:weight']) {
+    const value = pipData['s:weight']['s:value']
+    const unit = pipData['s:weight']['s:unitText']
+
+    Object.assign(productPip['en'], { grossWeight: `${value} ${unit}` })
+    Object.assign(productPip['sv'], { grossWeight: `${value} ${unit}` })
+  }
+
+  if (pipData['s:height']) {
+    const value = pipData['s:height']['s:value']
+    const unit = pipData['s:height']['s:unitText']
+
+    Object.assign(productPip['en'], { packageHeight: `${value} ${unit}` })
+    Object.assign(productPip['sv'], { packageHeight: `${value} ${unit}` })
+  }
+
+  if (pipData['s:width']) {
+    const value = pipData['s:width']['s:value']
+    const unit = pipData['s:width']['s:unitText']
+
+    Object.assign(productPip['en'], { packageWidth: `${value} ${unit}` })
+    Object.assign(productPip['sv'], { packageWidth: `${value} ${unit}` })
+  }
+
+  if (pipData['s:depth']) {
+    const value = pipData['s:depth']['s:value']
+    const unit = pipData['s:depth']['s:unitText']
+
+    Object.assign(productPip['en'], { packageDepth: `${value} ${unit}` })
+    Object.assign(productPip['sv'], { packageDepth: `${value} ${unit}` })
+  }
+
+  if (
+    pipData['s:countryOfAssembly'] &&
+    pipData['s:countryOfAssembly'].length > 0
+  ) {
+    const pipCountries = pipData['s:countryOfAssembly'].filter((country: any) =>
+      AVAILABLE_LANGUAGES.includes(country['@language']),
+    )
+
+    for (const country of pipCountries) {
+      const lang = country['@language']
+      const value = country['@value']
+
+      Object.assign(productPip[lang], {
+        countryOfOriginStatement: value ? value : '',
+      })
+    }
+  }
+
+  return productPip
+}
+
+export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
+  const productPip: any = {
+    en: {},
+    sv: {},
+  }
+
+  if (pipData.productName && pipData.productName.length > 0) {
+    const pipNames = pipData.productName.filter((names: any) =>
+      AVAILABLE_LANGUAGES.includes(names['@language']),
+    )
+
+    for (const name of pipNames) {
+      const lang = name['@language']
+      const value = name['@value']
+
+      Object.assign(productPip[lang], { productName: value ? value : '' })
+    }
+  }
+
+  if (pipData.brand) {
+    if (pipData.brand.brandName.length > 0) {
+      const pipBrands = pipData.brand.brandName.filter((brands: any) =>
+        AVAILABLE_LANGUAGES.includes(brands['@language']),
+      )
+      for (const brand of pipBrands) {
+        const lang = brand['@language']
+        const value = brand['@value']
+        Object.assign(productPip[lang], { brand: value ? value : '' })
+      }
+    }
+    if (pipData.brand.subBrandName.length > 0) {
+      const pipBrands = pipData.brand.subBrandName.filter((brands: any) =>
+        AVAILABLE_LANGUAGES.includes(brands['@language']),
+      )
+      for (const brand of pipBrands) {
+        const lang = brand['@language']
+        const value = brand['@value']
+        productPip[lang] = {
+          ...productPip[lang],
+          subbrand: value ? value : '',
+        }
+      }
+    }
+  }
+
+  if (pipData.brandOwner) {
+    const pipOwners = pipData.brandOwner.filter((owner: any) =>
+      AVAILABLE_LANGUAGES.includes(owner['@language']),
+    )
+
+    for (const owner of pipOwners) {
+      const lang = owner['@language']
+      const value = owner['@value']
+
+      Object.assign(productPip[lang], { owner: value ? value : '' })
+    }
+  }
+
+  if (pipData.image) {
+    Object.assign(productPip['en'], {
+      image: pipData.image.referencedFileURL['@id'],
+    })
+    Object.assign(productPip['sv'], {
+      image: pipData.image.referencedFileURL['@id'],
+    })
+  }
+
+  if (pipData.grossWeight) {
+    Object.assign(productPip['en'], {
+      grossWeight: `${pipData.grossWeight.value['@value']} ${pipData.grossWeight.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      grossWeight: `${pipData.grossWeight.value['@value']} ${pipData.grossWeight.unitCode}`,
+    })
+  }
+
+  if (pipData.inPackageHeight) {
+    Object.assign(productPip['en'], {
+      packageHeight: `${pipData.inPackageHeight.value['@value']} ${pipData.inPackageHeight.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      packageHeight: `${pipData.inPackageHeight.value['@value']} ${pipData.inPackageHeight.unitCode}`,
+    })
+  }
+
+  if (pipData.inPackageWidth) {
+    Object.assign(productPip['en'], {
+      packageWidth: `${pipData.inPackageWidth.value['@value']} ${pipData.inPackageWidth.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      packageWidth: `${pipData.inPackageWidth.value['@value']} ${pipData.inPackageWidth.unitCode}`,
+    })
+  }
+
+  if (pipData.inPackageDepth) {
+    Object.assign(productPip['en'], {
+      packageDepth: `${pipData.inPackageDepth.value['@value']} ${pipData.inPackageDepth.unitCode}`,
+    })
+    Object.assign(productPip['sv'], {
+      packageDepth: `${pipData.inPackageDepth.value['@value']} ${pipData.inPackageDepth.unitCode}`,
+    })
+  }
+
+  if (
+    pipData.countryOfOriginStatement &&
+    pipData.countryOfOriginStatement.length > 0
+  ) {
+    const countries = pipData.countryOfOriginStatement.filter((country: any) =>
+      AVAILABLE_LANGUAGES.includes(country['@language']),
+    )
+
+    for (const country of countries) {
+      const lang = country['@language']
+      const value = country['@value']
+
+      Object.assign(productPip[lang], {
+        countryOfOriginStatement: value ? value : '',
+      })
+    }
+  }
+
+  if (
+    pipData.packagingMarkedLabelAccreditation &&
+    pipData.packagingMarkedLabelAccreditation.length > 0
+  ) {
+    const value = pipData.packagingMarkedLabelAccreditation[0].countryCode
+
+    Object.assign(productPip['en'], {
+      markedLabel: value ? value : '',
+    })
+    Object.assign(productPip['sv'], {
+      markedLabel: value ? value : '',
+    })
+  }
+
+  return productPip
+}
+
+export const isAvailablePip = (data: any) => {
+  let available = true
+  for (const key of REQUIRED_PIP_KEY) {
+    if (!data[key]) {
+      console.log('data[key]', key, data[key])
+      available = false
+    }
+  }
+
+  return available
+}

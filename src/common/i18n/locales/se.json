@@ -4,6 +4,36 @@
       "buttons": {
         "scan": "Skanna QR-kod"
       }
+    },
+    "product": {
+      "title": "Produkt",
+      "incomplete": "Produktinformationen för denna produkt är ofullständig",
+      "labels": {
+        "passport": "Digitalt produktpass",
+        "gtin": "GTIN:",
+        "brand": "Varumärke:",
+        "subBrand": "Undervarumärke:",
+        "brandOwner": "Leverantör/varumärkesägare:",
+        "product": "Produkttyp:",
+        "size": "Storlek:",
+        "height": "Förpackningens höjd:",
+        "width": "Förpackningens bredd:",
+        "depth": "Förpackningens djup:",
+        "weight": "Bruttovikt inkl förpackning:",
+        "certification": "Certifieringar:",
+        "country": "Tillverkningsland:"
+      },
+      "buttons": {
+        "more": " (se mer)"
+      }
+    },
+    "certification": {
+      "labels": {
+        "license": "Licensnummer:",
+        "status": "Certifieringssta\u00ADtus:",
+        "holder": "Licensinneha\u00ADvare:",
+        "agency": "Certifieringsor\u00ADganisation:"
+      }
     }
   }
 }
