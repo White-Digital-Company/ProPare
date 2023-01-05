@@ -32,9 +32,9 @@ const Label = ({
         {title}
       </Text>
       <Text style={tw`font-normal w-[65%] text-lg text-light_blue leading-7`}>
-        {value}
+        {`${value} `}
         {isButton && (
-          <Text style={tw`text-sm leading-7`}>
+          <Text style={tw`text-sm font-extrabold leading-7 underline`}>
             {t('screens.product.buttons.more')}
           </Text>
         )}
