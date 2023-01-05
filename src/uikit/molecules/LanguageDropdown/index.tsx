@@ -18,11 +18,11 @@ const LANGUAGE_VALUES: Record<Language, { title: string; icon: FC<SvgProps> }> =
   {
     en: {
       title: 'en',
-      icon: Icons['FlagUK'],
+      icon: Icons['FlagUKCircle'],
     },
     se: {
       title: 'se',
-      icon: Icons['FlagSE'],
+      icon: Icons['FlagSVCircle'],
     },
   }
 
