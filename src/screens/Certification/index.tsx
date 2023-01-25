@@ -23,38 +23,25 @@ const CertificationScreen = () => {
           style={tw`p-[24px] h-[180px] items-center justify-center`}
           source={require('@assets/images/background.png')}
         >
-          <Text style={tw`font-bold text-2xl`}>Svanen</Text>
+          <Text style={tw`font-bold text-2xl`}>
+            {`${query.data.pip[params.language].markedLabel}`}
+          </Text>
           <Image
             source={require('@assets/images/svanen.png')}
             style={tw`absolute w-[70px] h-[56px] top-[10px] right-[30px]`}
           />
         </ImageBackground>
-        <View style={tw`grow w-full p-[35px] justify-center`}>
+        <View style={tw`grow w-full p-[35px] px-[16px] justify-center`}>
           <Label
             title={t('screens.certification.labels.status')}
-            value="Active"
-            titleStyle={'w-[45%]'}
-          />
-          <Label
-            title={t('screens.certification.labels.license')}
-            value={'Abc123'}
-            titleStyle={'w-[45%]'}
-          />
-          <Label
-            title={t('screens.certification.labels.agency')}
-            value={'XXXXX'}
-            titleStyle={'w-[45%]'}
-          />
-          <Label
-            title={t('screens.certification.labels.holder')}
-            value={'XXXXX'}
-            titleStyle={'w-[45%]'}
+            value={query.data.certification[params.language].status}
+            titleStyle="w-[45%]"
           />
         </View>
       </ScrollView>
       <View style={tw`w-full items-center justify-center py-[14px]`}>
         <Text
-          style={tw`text-light_blue text-xl font-light`}
+          style={tw`text-light_blue text-base font-light`}
         >{`<<<<GTIN${params.barcode}<<<<`}</Text>
       </View>
     </View>

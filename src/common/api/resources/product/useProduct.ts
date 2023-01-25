@@ -5,22 +5,26 @@ import productApi from './actions'
 import { productKeys } from './constants'
 import {
   connectProductDataArrToPip,
+  getCertificationDataFromResponse,
   getPipDataByProductInfo,
   isAvailablePip,
 } from '@tools/product'
 
 const selectData = (data: RemoteProductData): UseProductData => {
-  const dataFromEn = getPipDataByProductInfo(data.en)
-  const dataFromSv = getPipDataByProductInfo(data.sv)
+  const dataFromEn = getPipDataByProductInfo(data.pip.en)
+  const dataFromSv = getPipDataByProductInfo(data.pip.sv)
 
-  const finallyResult = connectProductDataArrToPip([dataFromEn, dataFromSv])
+  const pipResult = connectProductDataArrToPip([dataFromEn, dataFromSv])
 
-  console.log('finallyResult.sv', finallyResult.sv)
+  const certification = getCertificationDataFromResponse(data.certification)
 
   return {
-    ...finallyResult,
-    enAvailable: isAvailablePip(finallyResult.en),
-    svAvailable: isAvailablePip(finallyResult.sv),
+    pip: {
+      ...pipResult,
+      enAvailable: isAvailablePip(pipResult.en),
+      svAvailable: isAvailablePip(pipResult.sv),
+    },
+    certification,
   }
 }
 

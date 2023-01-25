@@ -98,7 +98,7 @@ const ProductLoaderSkeleton = ({ barcode }: ProductLoaderSkeletonProps) => {
       </View>
       <View style={tw`w-full items-center justify-center py-[14px]`}>
         <Text
-          style={tw`text-light_blue text-xl font-light`}
+          style={tw`text-light_blue text-base font-light`}
         >{`<<<<GTIN${barcode}<<<<`}</Text>
       </View>
     </View>

@@ -35,5 +35,13 @@
         "agency": "Certification Agency:"
       }
     }
+  },
+  "modals": {
+    "firstApp": {
+      "title": "This application only works with QR codes distributed by the ProPare project.",
+      "buttons": {
+        "ok": "Okay"
+      }
+    }
   }
 }

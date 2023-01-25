@@ -3,14 +3,14 @@ import type {
   Link,
   ProductLinksSetResponse,
   ProductLink,
-  RemoteProductData,
   PipData,
   ProductData,
+  RemotePipData,
 } from '@models/product'
 // @ts-ignore
 import DOMParser from 'react-native-html-parser'
 
-export const AVAILABLE_LANGUAGES: ['en', 'sv'] = ['en', 'sv']
+export const AVAILABLE_LANGUAGES: ['en', 'sv', 'se'] = ['en', 'sv', 'se']
 
 export const PIP_KEYS = [
   'brand',
@@ -29,26 +29,23 @@ export const PIP_KEYS = [
 
 export const REQUIRED_PIP_KEY = ['brand', 'owner', 'productName', 'image']
 
+export const REQUIRED_CERTIFICAITON_KEY = ['status']
+
 export const getProductDataLinks = (
   data: ProductLinksSetResponse,
   barcode: string,
 ) => {
-  const productLinks: { pip: ProductLink; certification: ProductLink } = {
+  const productLinks: { pip: ProductLink; certification: string } = {
     pip: {
       en: '',
       sv: '',
     },
-    certification: {
-      en: '',
-      sv: '',
-    },
+    certification: `https://api.nordicecolabel.org/gtin/${barcode}`,
   }
   for (const links of data.linkset) {
     if (links.anchor.includes(barcode)) {
-      console.log('links', links)
       for (const [key, value] of Object.entries(links)) {
         if (key === `https://gs1.org/voc/pip`) {
-          console.log('value', value)
           const pipLinks = value.filter(
             (link: Link) =>
               !link.hreflang ||
@@ -58,23 +55,6 @@ export const getProductDataLinks = (
           )
 
           productLinks.pip = Object.fromEntries(
-            pipLinks.map((link: Link) => [
-              link.hreflang ? link.hreflang[0] : 'en',
-              link.href,
-            ]),
-          ) as ProductLink
-        }
-
-        if (key === `https://gs1.org/voc/certificationInfo`) {
-          const pipLinks = value.filter(
-            (link: Link) =>
-              !link.hreflang ||
-              link.hreflang.some(
-                (lang: string) => lang === 'en' || lang === 'sv',
-              ),
-          )
-
-          productLinks.certification = Object.fromEntries(
             pipLinks.map((link: Link) => [
               link.hreflang ? link.hreflang[0] : 'en',
               link.href,
@@ -94,7 +74,7 @@ export const getProductDataLinks = (
 
 export const getProductInfoByGSLink = async (
   links: ProductLink,
-): Promise<RemoteProductData> => {
+): Promise<RemotePipData> => {
   const parser = new DOMParser.DOMParser()
 
   const productData = {}
@@ -115,13 +95,19 @@ export const getProductInfoByGSLink = async (
         const scriptData = parsed.querySelect(
           'script=[type="application/ld+json"]',
         )
-        try {
-          const parsedData = JSON.parse(scriptData[0].childNodes['0'].data)
-          return parsedData
-        } catch (error) {
-          console.log('parse error:', error)
-          return null
+
+        for (const script of scriptData) {
+          try {
+            const parsedData = JSON.parse(script.childNodes['0'].data)
+            if (parsedData['@context'].gs1) {
+              return parsedData
+            }
+          } catch (error) {
+            console.log('parse error:', error)
+          }
         }
+
+        return null
       }
 
       return data
@@ -130,7 +116,44 @@ export const getProductInfoByGSLink = async (
     Object.assign(productData, { [key]: inputPipData })
   }
 
-  return productData as RemoteProductData
+  return productData as RemotePipData
+}
+
+export const getCertificationDataFromResponse = (data: any) => {
+  if (!data) {
+    return {
+      sv: null,
+      en: null,
+    }
+  }
+
+  if (data.value && data.value.certificationDetails.length > 0) {
+    const certificationDetails = data.value.certificationDetails[0]
+
+    const certificaionInfo: any = {
+      sv: {},
+      en: {},
+    }
+
+    if (certificationDetails.certificationStatus.length > 0) {
+      const statuses = certificationDetails.certificationStatus.filter(
+        (status: any) => AVAILABLE_LANGUAGES.includes(status['@language']),
+      )
+
+      for (const status of statuses) {
+        const lang = status['@language']
+        const value = status['@value']
+
+        if (lang === 'se') {
+          Object.assign(certificaionInfo['sv'], { status: value ? value : '' })
+        } else {
+          Object.assign(certificaionInfo[lang], { status: value ? value : '' })
+        }
+      }
+    }
+
+    return certificaionInfo
+  }
 }
 
 export const getPipDataByProductInfo = (data: any[]): ProductData => {
@@ -181,19 +204,21 @@ export const connectProductDataArrToPip = (data: any[]) => {
 
   for (const key of PIP_KEYS) {
     for (const lang of AVAILABLE_LANGUAGES) {
-      const firstValue = firstPip[lang][key]
-      const secondValue = secondPip[lang][key]
+      if (lang !== 'se') {
+        const firstValue = firstPip[lang][key]
+        const secondValue = secondPip[lang][key]
 
-      if (!firstValue && secondValue) {
-        Object.assign(productPip[lang], { [key]: secondValue })
-      }
+        if (!firstValue && secondValue) {
+          Object.assign(productPip[lang], { [key]: secondValue })
+        }
 
-      if (firstValue && !secondValue) {
-        Object.assign(productPip[lang], { [key]: firstValue })
-      }
+        if (firstValue && !secondValue) {
+          Object.assign(productPip[lang], { [key]: firstValue })
+        }
 
-      if (firstValue && secondValue) {
-        Object.assign(productPip[lang], { [key]: firstValue })
+        if (firstValue && secondValue) {
+          Object.assign(productPip[lang], { [key]: firstValue })
+        }
       }
     }
   }
@@ -224,8 +249,6 @@ export const mapProductWithTypeGS = (pipData: any) => {
     sv: {},
   }
 
-  console.log('pipData', JSON.stringify(pipData))
-
   if (pipData.brand) {
     if (pipData.brand.brandName) {
       const pipBrands = pipData.brand.brandName.filter((brands: any) =>
@@ -253,30 +276,49 @@ export const mapProductWithTypeGS = (pipData: any) => {
     }
   }
 
-  if (
-    pipData.brandOwner &&
-    pipData.brandOwner.organizationName &&
-    pipData.brandOwner.organizationName.length > 0
-  ) {
-    const pipBrandOwners = pipData.brandOwner.organizationName.filter(
-      (owners: any) => AVAILABLE_LANGUAGES.includes(owners['@language']),
-    )
+  if (pipData.brandOwner) {
+    if (
+      pipData.brandOwner.organizationName &&
+      pipData.brandOwner.organizationName.length > 0
+    ) {
+      const pipBrandOwners = pipData.brandOwner.organizationName.filter(
+        (owners: any) => AVAILABLE_LANGUAGES.includes(owners['@language']),
+      )
 
-    for (const owner of pipBrandOwners) {
-      const lang = owner['@language']
-      const value = owner['@value']
+      for (const owner of pipBrandOwners) {
+        const lang = owner['@language']
+        const value = owner['@value']
 
-      Object.assign(productPip[lang], { owner: value ? value : '' })
+        Object.assign(productPip[lang], { owner: value ? value : '' })
+      }
+    } else if (pipData.brandOwner['@id']) {
+      Object.assign(productPip['en'], { owner: pipData.brandOwner['@id'] })
+      Object.assign(productPip['sv'], { owner: pipData.brandOwner['@id'] })
     }
   }
 
   if (pipData.productName) {
-    const lang = pipData.productName['@language']
-    const value = pipData.productName['@value']
+    if (Array.isArray(pipData.productName)) {
+      const names = pipData.productName.filter((name: any) =>
+        AVAILABLE_LANGUAGES.includes(name['@language']),
+      )
 
-    Object.assign(productPip[lang], {
-      productName: value ? value : '',
-    })
+      for (const name of names) {
+        const lang = name['@language']
+        const value = name['@value']
+
+        Object.assign(productPip[lang], {
+          productName: value ? value : '',
+        })
+      }
+    } else {
+      const lang = pipData.productName['@language']
+      const value = pipData.productName['@value']
+
+      Object.assign(productPip[lang], {
+        productName: value ? value : '',
+      })
+    }
   }
 
   if (pipData.inPackageDepth) {
@@ -334,10 +376,14 @@ export const mapProductWithTypeGS = (pipData: any) => {
   }
   if (pipData.image) {
     Object.assign(productPip['en'], {
-      image: pipData.image.referencedFileURL,
+      image:
+        pipData.image.referencedFileURL['@id'] ??
+        pipData.image.referencedFileURL,
     })
     Object.assign(productPip['sv'], {
-      image: pipData.image.referencedFileURL,
+      image:
+        pipData.image.referencedFileURL['@id'] ??
+        pipData.image.referencedFileURL,
     })
   }
 
@@ -591,7 +637,21 @@ export const isAvailablePip = (data: any) => {
   let available = true
   for (const key of REQUIRED_PIP_KEY) {
     if (!data[key]) {
-      console.log('data[key]', key, data[key])
+      available = false
+    }
+  }
+
+  return available
+}
+
+export const isAvailableCertification = (data: any) => {
+  if (!data) {
+    return false
+  }
+
+  let available = true
+  for (const key of REQUIRED_CERTIFICAITON_KEY) {
+    if (!data[key]) {
       available = false
     }
   }

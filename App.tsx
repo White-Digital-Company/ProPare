@@ -8,8 +8,12 @@ import { useDeviceContext } from 'twrnc'
 import RootRouter from '@navigation/RootRouter'
 import { QueryClientProvider } from '@api/queryClient'
 import { useEffect } from 'react'
+import Modals from '@uikit/organisms/Modals'
+import useFirstAppModal from '@hooks/useFirstAppModal'
 
 const App = () => {
+  const { visible, onClose } = useFirstAppModal()
+
   useDeviceContext(tw)
 
   useEffect(() => {
@@ -21,6 +25,11 @@ const App = () => {
       <NavigationContainer>
         <SafeAreaProvider>
           <RootRouter />
+          <Modals
+            modal={{ type: 'firstModal' }}
+            visible={visible}
+            closeModal={onClose}
+          />
         </SafeAreaProvider>
       </NavigationContainer>
     </QueryClientProvider>

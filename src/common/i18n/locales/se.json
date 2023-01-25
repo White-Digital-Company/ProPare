@@ -13,7 +13,7 @@
         "gtin": "GTIN:",
         "brand": "Varumärke:",
         "subBrand": "Undervarumärke:",
-        "brandOwner": "Leverantör/varumärkesägare:",
+        "brandOwner": "Leverantör:",
         "product": "Produkttyp:",
         "size": "Storlek:",
         "height": "Förpackningens höjd:",
@@ -33,6 +33,14 @@
         "status": "Certifieringssta\u00ADtus:",
         "holder": "Licensinneha\u00ADvare:",
         "agency": "Certifieringsor\u00ADganisation:"
+      }
+    }
+  },
+  "modals": {
+    "firstApp": {
+      "title": "Denna applikation fungerar endast med QR koder distribuerade av ProPare projektet.",
+      "buttons": {
+        "ok": "Okej"
       }
     }
   }

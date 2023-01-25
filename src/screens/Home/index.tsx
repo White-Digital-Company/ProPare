@@ -5,15 +5,19 @@ import { LanguageDropdown } from '@uikit/molecules'
 import { useTranslation } from 'react-i18next'
 import { useNavigation } from '@react-navigation/native'
 import type { RootRouterNavigationProps } from '@navigation/RootRouter'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const HomeScreen = () => {
   const navigation = useNavigation<RootRouterNavigationProps<'Home'>>()
   const { t } = useTranslation()
+  const { top } = useSafeAreaInsets()
 
   return (
     <View style={tw`flex-1 flex-col bg-white`}>
       <View style={tw`flex-1 flex-col`}>
-        <View style={tw`flex-1 flex-row justify-end pr-[16px] pt-[16px]`}>
+        <View
+          style={tw`flex-1 flex-row justify-end pr-[16px] pt-[${16 + top}px]`}
+        >
           <LanguageDropdown />
         </View>
         <View style={tw`flex-1 flex-col justify-between items-center`}>

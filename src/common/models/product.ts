@@ -26,9 +26,17 @@ export interface ProductLink {
   sv?: string
 }
 
-export interface RemoteProductData {
+export interface RemotePipData {
   en: any
   sv: any
+}
+
+export interface RemoteProductData {
+  pip: {
+    en: any
+    sv: any
+  }
+  certification: any
 }
 
 export interface ProductData {
@@ -37,10 +45,16 @@ export interface ProductData {
 }
 
 export interface UseProductData {
-  en: PipData
-  enAvailable: boolean
-  sv: PipData
-  svAvailable: boolean
+  pip: {
+    en: PipData
+    enAvailable: boolean
+    sv: PipData
+    svAvailable: boolean
+  }
+  certification: {
+    en: Certification
+    sv: Certification
+  }
 }
 
 export interface PipData {
@@ -56,4 +70,8 @@ export interface PipData {
   countryOfOriginStatement?: string
   image?: string
   markedLabel?: string
+}
+
+export interface Certification {
+  status: string
 }

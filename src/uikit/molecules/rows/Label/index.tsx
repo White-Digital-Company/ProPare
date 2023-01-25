@@ -27,14 +27,18 @@ const Label = ({
     >
       <Text
         android_hyphenationFrequency="normal"
-        style={tw`font-medium text-black text-lg w-[35%] mr-[10px] leading-7 ${titleStyle}`}
+        style={tw`font-medium text-black text-sm w-[35%] mr-[10px] leading-7 ${titleStyle}`}
       >
         {title}
       </Text>
-      <Text style={tw`font-normal w-[65%] text-lg text-light_blue leading-7`}>
+      <Text
+        style={tw`font-normal w-[65%] text-sm leading-7 ${
+          isButton ? 'text-light_blue' : 'text-gray'
+        }`}
+      >
         {`${value} `}
         {isButton && (
-          <Text style={tw`text-sm font-extrabold leading-7 underline`}>
+          <Text style={tw`text-xs font-extrabold leading-7 underline`}>
             {t('screens.product.buttons.more')}
           </Text>
         )}
