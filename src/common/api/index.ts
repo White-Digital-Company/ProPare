@@ -1,1 +1,1 @@
-export * from './resources/companies'
+export * from './resources/product'

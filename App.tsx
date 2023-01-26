@@ -1,24 +1,38 @@
-import { DocsSVG } from '@assets/icons'
+import 'react-native-gesture-handler'
 import '@i18n'
 import tw from '@tools/tailwind'
-import { useTranslation } from 'react-i18next'
-import { Text, View } from 'react-native'
-import Config from 'react-native-config'
+import SplashScreen from 'react-native-splash-screen'
+import { NavigationContainer } from '@react-navigation/native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { useDeviceContext } from 'twrnc'
+import RootRouter from '@navigation/RootRouter'
+import { QueryClientProvider } from '@api/queryClient'
+import { useEffect } from 'react'
+import Modals from '@uikit/organisms/Modals'
+import useFirstAppModal from '@hooks/useFirstAppModal'
 
 const App = () => {
+  const { visible, onClose } = useFirstAppModal()
+
   useDeviceContext(tw)
 
-  const { t } = useTranslation()
+  useEffect(() => {
+    SplashScreen.hide()
+  }, [])
 
   return (
-    <View style={tw`flex-1 justify-center items-center`}>
-      <Text style={tw`text-lg`}>Hi, let's check if everything works</Text>
-      <Text style={tw`text-lg`}>i18n: {t('screens.home.title')}</Text>
-      <Text>Config: {JSON.stringify(Config, null, 2)}</Text>
-      <Text style={tw`text-lg`}>SVG:</Text>
-      <DocsSVG />
-    </View>
+    <QueryClientProvider>
+      <NavigationContainer>
+        <SafeAreaProvider>
+          <RootRouter />
+          <Modals
+            modal={{ type: 'firstModal' }}
+            visible={visible}
+            closeModal={onClose}
+          />
+        </SafeAreaProvider>
+      </NavigationContainer>
+    </QueryClientProvider>
   )
 }
 

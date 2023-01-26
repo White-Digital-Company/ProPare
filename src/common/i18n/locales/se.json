@@ -1,0 +1,47 @@
+{
+  "screens": {
+    "home": {
+      "buttons": {
+        "scan": "Skanna QR-kod"
+      }
+    },
+    "product": {
+      "title": "Produkt",
+      "incomplete": "Produktinformationen för denna produkt är ofullständig",
+      "labels": {
+        "passport": "Digitalt produktpass",
+        "gtin": "GTIN:",
+        "brand": "Varumärke:",
+        "subBrand": "Undervarumärke:",
+        "brandOwner": "Leverantör:",
+        "product": "Produkttyp:",
+        "size": "Storlek:",
+        "height": "Förpackningens höjd:",
+        "width": "Förpackningens bredd:",
+        "depth": "Förpackningens djup:",
+        "weight": "Bruttovikt inkl förpackning:",
+        "certification": "Certifieringar:",
+        "country": "Tillverkningsland:"
+      },
+      "buttons": {
+        "more": "(se mer)"
+      }
+    },
+    "certification": {
+      "labels": {
+        "license": "Licensnummer:",
+        "status": "Certifieringssta\u00ADtus:",
+        "holder": "Licensinneha\u00ADvare:",
+        "agency": "Certifieringsor\u00ADganisation:"
+      }
+    }
+  },
+  "modals": {
+    "firstApp": {
+      "title": "Denna applikation fungerar endast med QR koder distribuerade av ProPare projektet.",
+      "buttons": {
+        "ok": "Okej"
+      }
+    }
+  }
+}
