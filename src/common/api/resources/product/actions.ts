@@ -25,15 +25,20 @@ const getProductData = async (barcode: string): Promise<RemoteProductData> => {
 
   const certificationData = await productApi
     .getProductDataByLink(links.certification)
-    .catch(() => null)
+    .catch(error => {
+      if (error.response.data === 'Ok') {
+        return 'Ok'
+      }
+      return null
+    })
 
   return { pip: productData, certification: certificationData }
 }
 
 const getProductDataByLink = async (link: string) => {
-  const { data } = await axios.get(link)
+  const res = await axios.get(link)
 
-  return data
+  return res.data
 }
 
 export default {

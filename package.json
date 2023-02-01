@@ -5,7 +5,7 @@
   "scripts": {
     "// --- develop --- //": "",
     "bootstrap": "yarn && cd ios && npx pod install && cd ../",
-    "dev": "yarn adb && react-native start",
+    "dev": "react-native start",
     "adb": "wd-adb",
     "android": "adb shell pm uninstall --user 0 com.whitedigital.propare ; react-native run-android",
     "ios": "react-native run-ios --simulator='iPhone 12 (15.0)'",
@@ -88,7 +88,6 @@
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
-    "@wd_company/scripts": "^1.2.7",
     "babel-jest": "^26.6.3",
     "eslint": "^7.32.0",
     "eslint-config-universe": "^7.0.1",

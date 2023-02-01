@@ -1,5 +1,5 @@
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder'
-import { View, ImageBackground, Text } from 'react-native'
+import { View, Text } from 'react-native'
 import tw from '@tools/tailwind'
 
 interface ProductLoaderSkeletonProps {

@@ -74,4 +74,6 @@ export interface PipData {
 
 export interface Certification {
   status: string
+  license?: string
+  brand?: boolean
 }

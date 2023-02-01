@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 export interface LabelProps {
   title: string
   value: string | number
-  titleStyle?: string
+  titleWidthPercent?: number
   isButton?: boolean
   onPress?: () => void
 }
@@ -13,9 +13,9 @@ export interface LabelProps {
 const Label = ({
   title,
   value,
-  titleStyle = '',
   isButton = false,
   onPress,
+  titleWidthPercent = 35,
 }: LabelProps) => {
   const { t } = useTranslation()
   return (
@@ -27,16 +27,16 @@ const Label = ({
     >
       <Text
         android_hyphenationFrequency="normal"
-        style={tw`font-medium text-black text-sm w-[35%] mr-[10px] leading-7 ${titleStyle}`}
+        style={tw`font-medium text-black text-sm w-[${titleWidthPercent}%] mr-[10px] leading-7`}
       >
         {title}
       </Text>
       <Text
-        style={tw`font-normal w-[65%] text-sm leading-7 ${
-          isButton ? 'text-light_blue' : 'text-gray'
-        }`}
+        style={tw`font-normal w-[${
+          100 - titleWidthPercent
+        }%] text-sm leading-7 ${isButton ? 'text-light_blue' : 'text-gray'}`}
       >
-        {`${value} `}
+        {`${value}`}
         {isButton && (
           <Text style={tw`text-xs font-extrabold leading-7 underline`}>
             {t('screens.product.buttons.more')}

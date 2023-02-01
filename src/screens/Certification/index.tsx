@@ -35,8 +35,31 @@ const CertificationScreen = () => {
           <Label
             title={t('screens.certification.labels.status')}
             value={query.data.certification[params.language].status}
-            titleStyle="w-[45%]"
+            titleWidthPercent={55}
           />
+          {query.data.certification[params.language].license && (
+            <Label
+              title={t('screens.certification.labels.license')}
+              value={
+                query.data.certification[params.language].license as string
+              }
+              titleWidthPercent={55}
+            />
+          )}
+          {query.data.certification[params.language].brand && (
+            <>
+              <Label
+                title={t('screens.certification.labels.holder')}
+                value="Svanen"
+                titleWidthPercent={55}
+              />
+              <Label
+                title={t('screens.certification.labels.agency')}
+                value="Svanen"
+                titleWidthPercent={55}
+              />
+            </>
+          )}
         </View>
       </ScrollView>
       <View style={tw`w-full items-center justify-center py-[14px]`}>
