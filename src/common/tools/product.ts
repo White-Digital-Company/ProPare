@@ -126,13 +126,32 @@ export const getCertificationDataFromResponse = (data: any) => {
       en: null,
     }
   }
+  
+  if (data === 'Ok') {
+    return {
+      sv: {
+        status: 'Active',
+        license: '',
+        brand: false,
+      },
+      en: {
+        status: 'Active',
+        license: '',
+        brand: false,
+      },
+    }
+  }
 
   if (data.value && data.value.certificationDetails.length > 0) {
     const certificationDetails = data.value.certificationDetails[0]
 
     const certificaionInfo: any = {
-      sv: {},
-      en: {},
+      sv: {
+        brand: true,
+      },
+      en: {
+        brand: true,
+      },
     }
 
     if (certificationDetails.certificationStatus.length > 0) {
@@ -148,6 +167,23 @@ export const getCertificationDataFromResponse = (data: any) => {
           Object.assign(certificaionInfo['sv'], { status: value ? value : '' })
         } else {
           Object.assign(certificaionInfo[lang], { status: value ? value : '' })
+        }
+      }
+    }
+
+    if (certificationDetails.certificationIdentification.length > 0) {
+      const licenses = certificationDetails.certificationIdentification.filter(
+        (status: any) => AVAILABLE_LANGUAGES.includes(status['@language']),
+      )
+
+      for (const license of licenses) {
+        const lang = license['@language']
+        const value = license['@value']
+
+        if (lang === 'se') {
+          Object.assign(certificaionInfo['sv'], { license: value ? value : '' })
+        } else {
+          Object.assign(certificaionInfo[lang], { license: value ? value : '' })
         }
       }
     }

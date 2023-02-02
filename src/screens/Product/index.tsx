@@ -12,7 +12,6 @@ import Label from '@uikit/molecules/rows/Label'
 import FlagButton from '@uikit/molecules/Buttons/FlagButton'
 import { useTranslation } from 'react-i18next'
 import ProductLoaderSkeleton from './components/ProductLoaderSkeleton/index'
-import { isAvailableCertification } from '@tools/product'
 
 const ProductScreen = () => {
   const navigation = useNavigation<RootRouterNavigationProps<'Certification'>>()
@@ -153,9 +152,7 @@ const ProductScreen = () => {
               <Label
                 title={t('screens.product.labels.certification')}
                 value={`${query.data.pip[language].markedLabel}`}
-                isButton={isAvailableCertification(
-                  query.data.certification[language],
-                )}
+                isButton
                 onPress={() =>
                   navigation.navigate('Certification', {
                     barcode: params.barcode,
