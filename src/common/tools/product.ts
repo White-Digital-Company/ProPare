@@ -99,6 +99,9 @@ export const getProductInfoByGSLink = async (
         for (const script of scriptData) {
           try {
             const parsedData = JSON.parse(script.childNodes['0'].data)
+            if (Array.isArray(parsedData) && parsedData[0]['@context'].gs1) {
+              return parsedData[0]
+            }
             if (parsedData['@context'].gs1) {
               return parsedData
             }
@@ -410,17 +413,31 @@ export const mapProductWithTypeGS = (pipData: any) => {
       })
     }
   }
+
   if (pipData.image) {
-    Object.assign(productPip['en'], {
-      image:
-        pipData.image.referencedFileURL['@id'] ??
-        pipData.image.referencedFileURL,
-    })
-    Object.assign(productPip['sv'], {
-      image:
-        pipData.image.referencedFileURL['@id'] ??
-        pipData.image.referencedFileURL,
-    })
+    if (pipData.image.referenceFileURL) {
+      Object.assign(productPip['en'], {
+        image:
+          pipData.image.referenceFileURL['@id'] ??
+          pipData.image.referenceFileURL,
+      })
+      Object.assign(productPip['sv'], {
+        image:
+          pipData.image.referenceFileURL['@id'] ??
+          pipData.image.referenceFileURL,
+      })
+    } else {
+      Object.assign(productPip['en'], {
+        image:
+          pipData.image.referencedFileURL['@id'] ??
+          pipData.image.referencedFileURL,
+      })
+      Object.assign(productPip['sv'], {
+        image:
+          pipData.image.referencedFileURL['@id'] ??
+          pipData.image.referencedFileURL,
+      })
+    }
   }
 
   if (pipData.packagingMarkedLabelAccreditation) {
