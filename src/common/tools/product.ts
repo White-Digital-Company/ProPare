@@ -129,7 +129,7 @@ export const getCertificationDataFromResponse = (data: any) => {
       en: null,
     }
   }
-  console.log('certification data', JSON.stringify(data))
+  
   if (data === 'Ok') {
     return {
       sv: {
