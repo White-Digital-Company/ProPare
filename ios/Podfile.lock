@@ -105,7 +105,7 @@ PODS:
   - GoogleUtilitiesComponents (1.1.0):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (1.7.2)
-  - hermes-engine (0.70.3)
+  - hermes-engine (0.70.5)
   - libevent (2.1.12)
   - MLImage (1.0.0-beta3)
   - MLKitBarcodeScanning (2.2.0):
@@ -726,7 +726,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: bad72cb363809015b1f7f19beb1f1cd23c589f95
   GoogleUtilitiesComponents: 679b2c881db3b615a2777504623df6122dd20afe
   GTMSessionFetcher: 5595ec75acf5be50814f81e9189490412bad82ba
-  hermes-engine: bb344d89a0d14c2c91ad357480a79698bb80e186
+  hermes-engine: 7fe5fc6ef707b7fdcb161b63898ec500e285653d
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   MLImage: 489dfec109f21da8621b28d476401aaf7a0d4ff4
   MLKitBarcodeScanning: d92fe1911001ec36870162c5a0eb206f612b7169
@@ -772,7 +772,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 62232ba8f562f7dea5ba1b3383494eb5bf97a4d3
   RNLocalize: 0df7970cfc60389f00eb62fd7c097dc75af3fb4f
   RNReactNativeHapticFeedback: 1e3efeca9628ff9876ee7cdd9edec1b336913f8c
-  RNReanimated: eb400f1c21a0f39cb3830eaea92112b3ad5a1ab9
+  RNReanimated: 48c5dbbeb6858f75db0a6314260a4289bc098a52
   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
   RNSVG: 3a79c0c4992213e4f06c08e62730c5e7b9e4dc17
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
