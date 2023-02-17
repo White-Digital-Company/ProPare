@@ -55,10 +55,23 @@ export const getProductDataLinks = (
           )
 
           productLinks.pip = Object.fromEntries(
-            pipLinks.map((link: Link) => [
-              link.hreflang ? link.hreflang[0] : 'en',
-              link.href,
-            ]),
+            // eslint-disable-next-line unicorn/no-array-reduce
+            pipLinks.reduce((acc: any[], link: Link) => {
+              if (
+                link.hreflang &&
+                !acc.some((val: any) => val[0] === link.hreflang![0])
+              ) {
+                acc.push([link.hreflang[0], link.href])
+
+                return acc
+              }
+
+              if (!acc.some((val: any) => val[0] === 'en')) {
+                acc.push(['en', link.href])
+              }
+
+              return acc
+            }, []),
           ) as ProductLink
         }
       }
@@ -129,7 +142,7 @@ export const getCertificationDataFromResponse = (data: any) => {
       en: null,
     }
   }
-  
+
   if (data === 'Ok') {
     return {
       sv: {
@@ -568,7 +581,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
   }
 
   if (pipData.brand) {
-    if (pipData.brand.brandName.length > 0) {
+    if (!!pipData.brand.brandName && pipData.brand.brandName.length > 0) {
       const pipBrands = pipData.brand.brandName.filter((brands: any) =>
         AVAILABLE_LANGUAGES.includes(brands['@language']),
       )
@@ -578,7 +591,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
         Object.assign(productPip[lang], { brand: value ? value : '' })
       }
     }
-    if (pipData.brand.subBrandName.length > 0) {
+    if (!!pipData.brand.subBrandName && pipData.brand.subBrandName.length > 0) {
       const pipBrands = pipData.brand.subBrandName.filter((brands: any) =>
         AVAILABLE_LANGUAGES.includes(brands['@language']),
       )
@@ -594,15 +607,20 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
   }
 
   if (pipData.brandOwner) {
-    const pipOwners = pipData.brandOwner.filter((owner: any) =>
-      AVAILABLE_LANGUAGES.includes(owner['@language']),
-    )
+    if (Array.isArray(pipData.brandOwner)) {
+      const pipOwners = pipData.brandOwner.filter((owner: any) =>
+        AVAILABLE_LANGUAGES.includes(owner['@language']),
+      )
 
-    for (const owner of pipOwners) {
-      const lang = owner['@language']
-      const value = owner['@value']
+      for (const owner of pipOwners) {
+        const lang = owner['@language']
+        const value = owner['@value']
 
-      Object.assign(productPip[lang], { owner: value ? value : '' })
+        Object.assign(productPip[lang], { owner: value ? value : '' })
+      }
+    } else {
+      Object.assign(productPip['en'], { owner: pipData.brandOwner['@id'] })
+      Object.assign(productPip['sv'], { owner: pipData.brandOwner['@id'] })
     }
   }
 
@@ -615,7 +633,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
     })
   }
 
-  if (pipData.grossWeight) {
+  if (pipData.grossWeight && pipData.grossWeight.value['@value']) {
     Object.assign(productPip['en'], {
       grossWeight: `${pipData.grossWeight.value['@value']} ${pipData.grossWeight.unitCode}`,
     })
@@ -624,7 +642,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
     })
   }
 
-  if (pipData.inPackageHeight) {
+  if (pipData.inPackageHeight && pipData.inPackageHeight.value['@value']) {
     Object.assign(productPip['en'], {
       packageHeight: `${pipData.inPackageHeight.value['@value']} ${pipData.inPackageHeight.unitCode}`,
     })
@@ -633,7 +651,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
     })
   }
 
-  if (pipData.inPackageWidth) {
+  if (pipData.inPackageWidth && pipData.inPackageWidth.value['@value']) {
     Object.assign(productPip['en'], {
       packageWidth: `${pipData.inPackageWidth.value['@value']} ${pipData.inPackageWidth.unitCode}`,
     })
@@ -642,7 +660,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
     })
   }
 
-  if (pipData.inPackageDepth) {
+  if (pipData.inPackageDepth && pipData.inPackageDepth.value['@value']) {
     Object.assign(productPip['en'], {
       packageDepth: `${pipData.inPackageDepth.value['@value']} ${pipData.inPackageDepth.unitCode}`,
     })
@@ -673,7 +691,7 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
     pipData.packagingMarkedLabelAccreditation &&
     pipData.packagingMarkedLabelAccreditation.length > 0
   ) {
-    const value = pipData.packagingMarkedLabelAccreditation[0].countryCode
+    const value = pipData.packagingMarkedLabelAccreditation[0].value
 
     Object.assign(productPip['en'], {
       markedLabel: value ? value : '',

@@ -19,7 +19,11 @@ const getProductData = async (barcode: string): Promise<RemoteProductData> => {
     },
   })
 
+  console.log('data', data)
+
   const links = getProductDataLinks(data, barcode)
+
+  console.log('links', links)
 
   const productData = await getProductInfoByGSLink(links.pip)
 
