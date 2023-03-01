@@ -3,6 +3,10 @@
     "home": {
       "buttons": {
         "scan": "Skanna QR-kod"
+      },
+      "title": {
+        "about": "Mer om ProPare",
+        "url": "www.propare.se"
       }
     },
     "product": {

@@ -1,4 +1,8 @@
-import type { RemoteProductData, UseProductData } from '@models/product'
+import type {
+  RemoteProductData,
+  Barcode,
+  UseProductData,
+} from '@models/product'
 import { useQuery } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import productApi from './actions'
@@ -28,9 +32,9 @@ const selectData = (data: RemoteProductData): UseProductData => {
   }
 }
 
-const useProduct = (barcode: string) => {
+const useProduct = (barcode: Barcode) => {
   const query = useQuery<RemoteProductData, AxiosError, UseProductData>(
-    productKeys.root(barcode),
+    productKeys.root(barcode.data),
     () => productApi.getProductData(barcode),
     {
       select: selectData,

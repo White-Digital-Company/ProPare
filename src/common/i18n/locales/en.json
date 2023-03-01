@@ -3,6 +3,10 @@
     "home": {
       "buttons": {
         "scan": "Scan QR-code"
+      },
+      "title": {
+        "about": "More about ProPare",
+        "url": "www.propare.eu"
       }
     },
     "product": {

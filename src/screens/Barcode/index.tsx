@@ -25,13 +25,16 @@ const BarcodeScreen = () => {
 
   useEffect(() => {
     if (barcodes?.length && !scanned) {
-      let barcodeData = barcodes[0].rawValue
-      if (barcodeData?.includes('http')) {
-        const barcodeUrlArray = barcodeData.split('/')
-        barcodeData = barcodeUrlArray[barcodeUrlArray.length - 1]
-      }
+      const barcodeData = barcodes[0].rawValue
+
+      navigation.replace('Product', {
+        barcode: {
+          type: barcodeData?.includes('http') ? 'URL' : 'CODE',
+          data: barcodeData ?? '',
+        },
+      })
+
       setScanned(true)
-      navigation.replace('Product', { barcode: barcodeData ?? '' })
     }
   }, [barcodes])
 

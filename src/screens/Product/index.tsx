@@ -12,6 +12,7 @@ import Label from '@uikit/molecules/rows/Label'
 import FlagButton from '@uikit/molecules/Buttons/FlagButton'
 import { useTranslation } from 'react-i18next'
 import ProductLoaderSkeleton from './components/ProductLoaderSkeleton/index'
+import { getCodeByBarcode } from '@tools/barcode'
 
 const ProductScreen = () => {
   const navigation = useNavigation<RootRouterNavigationProps<'Certification'>>()
@@ -21,6 +22,7 @@ const ProductScreen = () => {
   const [language, setLanguage] = useState<'sv' | 'en'>('sv')
 
   const query = useProduct(params.barcode)
+  const code = getCodeByBarcode(params.barcode)
 
   useEffect(() => {
     if (
@@ -33,7 +35,7 @@ const ProductScreen = () => {
   }, [query.isSuccess])
 
   if (query.isLoading) {
-    return <ProductLoaderSkeleton barcode={params.barcode} />
+    return <ProductLoaderSkeleton barcode={code} />
   }
 
   return (
@@ -84,10 +86,7 @@ const ProductScreen = () => {
             )}
           </ImageBackground>
           <View style={tw`px-[16px]`}>
-            <Label
-              title={t('screens.product.labels.gtin')}
-              value={params.barcode}
-            />
+            <Label title={t('screens.product.labels.gtin')} value={code} />
             {query.data.pip[language].brand && (
               <Label
                 title={t('screens.product.labels.brand')}
@@ -167,7 +166,7 @@ const ProductScreen = () => {
       <View style={tw`w-full items-center justify-center py-[14px]`}>
         <Text
           style={tw`text-light_blue text-base font-light`}
-        >{`<<<<GTIN${params.barcode}<<<<`}</Text>
+        >{`<<<<GTIN${code}<<<<`}</Text>
       </View>
     </View>
   )

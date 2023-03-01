@@ -2,16 +2,17 @@ import httpClient from '@api/httpClient'
 import axios from 'axios'
 import { productApi } from '@api'
 import type {
+  Barcode,
   ProductLinksSetResponse,
   RemoteProductData,
 } from '@models/product'
-import { productUrls } from './constants'
 import { getProductDataLinks, getProductInfoByGSLink } from '@tools/product'
+import { generateRequestLinkByBarcode, getCodeByBarcode } from '@tools/barcode'
 
-const getProductData = async (barcode: string): Promise<RemoteProductData> => {
-  const requestLink = barcode.includes('http')
-    ? barcode
-    : productUrls.root(barcode)
+const getProductData = async (barcode: Barcode): Promise<RemoteProductData> => {
+  const requestLink = generateRequestLinkByBarcode(barcode)
+
+  const code = getCodeByBarcode(barcode)
 
   const { data } = await httpClient.get<ProductLinksSetResponse>(requestLink, {
     params: {
@@ -19,11 +20,7 @@ const getProductData = async (barcode: string): Promise<RemoteProductData> => {
     },
   })
 
-  console.log('data', data)
-
-  const links = getProductDataLinks(data, barcode)
-
-  console.log('links', links)
+  const links = getProductDataLinks(data, code)
 
   const productData = await getProductInfoByGSLink(links.pip)
 

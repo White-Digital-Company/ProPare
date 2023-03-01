@@ -8,15 +8,16 @@ import BarcodeScreen from '@screens/Barcode'
 import ProductScreen from '@screens/Product'
 import { useTranslation } from 'react-i18next'
 import CertificationScreen from '@screens/Certification'
+import type { Barcode } from '@models/product'
 
 export type RootStackParamList = {
   Home: undefined
   Barcode: undefined
   Product: {
-    barcode: string
+    barcode: Barcode
   }
   Certification: {
-    barcode: string
+    barcode: Barcode
     language: 'en' | 'sv'
   }
 }

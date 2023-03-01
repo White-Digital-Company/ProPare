@@ -1,4 +1,4 @@
-import { Image, View } from 'react-native'
+import { Image, View, Text, Linking } from 'react-native'
 import tw from '@tools/tailwind'
 import { PrimaryButton } from '@uikit/molecules/Buttons'
 import { LanguageDropdown } from '@uikit/molecules'
@@ -34,7 +34,26 @@ const HomeScreen = () => {
         </View>
       </View>
       <View style={tw`flex-1 justify-end`}>
-        <View style={tw`bg-dark_blue h-[102px]`} />
+        <View
+          style={tw`flex flex-col justify-center items-center bg-dark_blue h-[102px]`}
+        >
+          <Text
+            onPress={() =>
+              Linking.openURL(`http://${t('screens.home.title.url')}`)
+            }
+            style={tw`text-white text-l font-bold`}
+          >
+            {t('screens.home.title.about')}
+          </Text>
+          <Text
+            onPress={() =>
+              Linking.openURL(`http://${t('screens.home.title.url')}`)
+            }
+            style={tw`text-white text-l font-semibold underline`}
+          >
+            {t('screens.home.title.url')}
+          </Text>
+        </View>
       </View>
     </View>
   )

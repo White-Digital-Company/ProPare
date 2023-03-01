@@ -2,6 +2,13 @@ export interface ProductLinksSetResponse {
   linkset: ProductLinks[]
 }
 
+export type BarcodeType = 'URL' | 'CODE'
+
+export interface Barcode {
+  type: BarcodeType
+  data: string
+}
+
 export interface ProductLinks {
   anchor: string
   itemDescription: string
