@@ -12,15 +12,8 @@ export const getCodeByBarcode = (barcode: Barcode) => {
 }
 
 export const generateRequestLinkByBarcode = (barcode: Barcode) => {
-  console.log('bARCODE', barcode)
   if (barcode.type === 'URL') {
     const barcodeData = barcode.data.split('/')
-    console.log(
-      'barcodeData.findIndex(val => val.length > 12)',
-      barcodeData.findIndex(val => val.length > 12),
-      barcodeData[barcodeData.findIndex(val => val.length > 12)],
-      barcodeData.slice(barcodeData.findIndex(val => val.length > 12)),
-    )
     return productUrls.root(
       barcodeData
         .slice(barcodeData.findIndex(val => val.length > 12))

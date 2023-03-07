@@ -22,6 +22,10 @@ const getProductData = async (barcode: Barcode): Promise<RemoteProductData> => {
 
   const links = getProductDataLinks(data, code)
 
+  if (!Object.values(links.pip).some(val => !!val)) {
+    return { type: 'ERROR' }
+  }
+
   const productData = await getProductInfoByGSLink(links.pip)
 
   const certificationData = await productApi
@@ -33,7 +37,7 @@ const getProductData = async (barcode: Barcode): Promise<RemoteProductData> => {
       return null
     })
 
-  return { pip: productData, certification: certificationData }
+  return { type: 'SUCCESS', pip: productData, certification: certificationData }
 }
 
 const getProductDataByLink = async (link: string) => {

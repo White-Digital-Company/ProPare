@@ -38,7 +38,12 @@ export interface RemotePipData {
   sv: any
 }
 
-export interface RemoteProductData {
+export type RemoteProductData =
+  | RemoteSuccessProductData
+  | RemoteErrorProductData
+
+export interface RemoteSuccessProductData {
+  type: 'SUCCESS'
   pip: {
     en: any
     sv: any
@@ -46,12 +51,25 @@ export interface RemoteProductData {
   certification: any
 }
 
+export type RemoteProductError = 'NO-PIP'
+
+export interface RemoteErrorProductData {
+  type: 'ERROR'
+}
+
 export interface ProductData {
   en: PipData
   sv: PipData
 }
 
-export interface UseProductData {
+export type UseProductData = UseProductSuccessData | UseProductErrorData
+
+export interface UseProductErrorData {
+  type: 'NOT_PROJECT'
+}
+
+export interface UseProductSuccessData {
+  type: 'SUCCESS'
   pip: {
     en: PipData
     enAvailable: boolean
@@ -60,7 +78,9 @@ export interface UseProductData {
   }
   certification: {
     en: Certification
+    enAvailable: boolean
     sv: Certification
+    svAvailable: boolean
   }
 }
 
@@ -82,5 +102,7 @@ export interface PipData {
 export interface Certification {
   status: string
   license?: string
-  brand?: boolean
+  subject?: string
+  agency?: string
+  url?: string
 }

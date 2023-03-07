@@ -11,7 +11,8 @@
     },
     "product": {
       "title": "Product",
-      "incomplete": "Product information for this product is incomplete",
+      "incomplete": "There are not enough info about this product",
+      "not_project": "This product is not part of this project",
       "labels": {
         "passport": "Digital Product Passport",
         "gtin": "GTIN:",
@@ -25,7 +26,8 @@
         "depth": "Package Depth:",
         "weight": "Gross Weight:",
         "certification": "Certification:",
-        "country": "Country:"
+        "country": "Country:",
+        "not_certification": "Certification information not found"
       },
       "buttons": {
         "more": "(see more)"

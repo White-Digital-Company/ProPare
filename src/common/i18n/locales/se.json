@@ -12,6 +12,7 @@
     "product": {
       "title": "Produkt",
       "incomplete": "Produktinformationen för denna produkt är ofullständig",
+      "not_project": "Denna produkt är inte en del av detta projekt",
       "labels": {
         "passport": "Digitalt produktpass",
         "gtin": "GTIN:",
@@ -25,7 +26,8 @@
         "depth": "Förpackningens djup:",
         "weight": "Bruttovikt inkl förpackning:",
         "certification": "Certifieringar:",
-        "country": "Tillverkningsland:"
+        "country": "Tillverkningsland:",
+        "not_certification": "Certifieringsinformation hittades inte"
       },
       "buttons": {
         "more": "(se mer)"

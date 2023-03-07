@@ -5,14 +5,16 @@ import { useRoute } from '@react-navigation/native'
 import type { RootRouterScreenProps } from '@navigation/RootRouter'
 import Label from '@uikit/molecules/rows/Label'
 import { useTranslation } from 'react-i18next'
+import { getCodeByBarcode } from '@tools/barcode'
 
 const CertificationScreen = () => {
   const { t } = useTranslation()
   const { params } = useRoute<RootRouterScreenProps<'Certification'>>()
 
   const query = useProduct(params.barcode)
+  const code = getCodeByBarcode(params.barcode)
 
-  if (!query.isSuccess) {
+  if (!query.isSuccess || query.data.type === 'NOT_PROJECT') {
     return null
   }
 
@@ -26,10 +28,14 @@ const CertificationScreen = () => {
           <Text style={tw`font-bold text-2xl`}>
             {`${query.data.pip[params.language].markedLabel}`}
           </Text>
-          <Image
-            source={require('@assets/images/svanen.png')}
-            style={tw`absolute w-[70px] h-[56px] top-[10px] right-[30px]`}
-          />
+          {query.data.certification[params.language].url && (
+            <Image
+              source={{
+                uri: query.data.certification[params.language].url,
+              }}
+              style={tw`absolute w-[70px] h-[56px] top-[10px] right-[30px]`}
+            />
+          )}
         </ImageBackground>
         <View style={tw`grow w-full p-[35px] px-[16px] justify-center`}>
           <Label
@@ -46,26 +52,28 @@ const CertificationScreen = () => {
               titleWidthPercent={55}
             />
           )}
-          {query.data.certification[params.language].brand && (
-            <>
-              <Label
-                title={t('screens.certification.labels.holder')}
-                value="Svanen"
-                titleWidthPercent={55}
-              />
-              <Label
-                title={t('screens.certification.labels.agency')}
-                value="Svanen"
-                titleWidthPercent={55}
-              />
-            </>
+          {query.data.certification[params.language].subject && (
+            <Label
+              title={t('screens.certification.labels.holder')}
+              value={
+                query.data.certification[params.language].subject as string
+              }
+              titleWidthPercent={55}
+            />
+          )}
+          {query.data.certification[params.language].agency && (
+            <Label
+              title={t('screens.certification.labels.agency')}
+              value={query.data.certification[params.language].agency as string}
+              titleWidthPercent={55}
+            />
           )}
         </View>
       </ScrollView>
       <View style={tw`w-full items-center justify-center py-[14px]`}>
         <Text
           style={tw`text-light_blue text-base font-light`}
-        >{`<<<<GTIN${params.barcode}<<<<`}</Text>
+        >{`<<<<GTIN${code}<<<<`}</Text>
       </View>
     </View>
   )

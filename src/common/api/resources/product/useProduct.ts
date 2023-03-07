@@ -1,3 +1,4 @@
+import { isAvailableCertification } from './../../../tools/product'
 import type {
   RemoteProductData,
   Barcode,
@@ -15,6 +16,12 @@ import {
 } from '@tools/product'
 
 const selectData = (data: RemoteProductData): UseProductData => {
+  if (data.type === 'ERROR') {
+    return {
+      type: 'NOT_PROJECT',
+    }
+  }
+
   const dataFromEn = getPipDataByProductInfo(data.pip.en)
   const dataFromSv = getPipDataByProductInfo(data.pip.sv)
 
@@ -23,12 +30,17 @@ const selectData = (data: RemoteProductData): UseProductData => {
   const certification = getCertificationDataFromResponse(data.certification)
 
   return {
+    type: 'SUCCESS',
     pip: {
       ...pipResult,
       enAvailable: isAvailablePip(pipResult.en),
       svAvailable: isAvailablePip(pipResult.sv),
     },
-    certification,
+    certification: {
+      ...certification,
+      enAvailable: isAvailableCertification(certification.en),
+      svAvailable: isAvailableCertification(certification.sv),
+    },
   }
 }
 

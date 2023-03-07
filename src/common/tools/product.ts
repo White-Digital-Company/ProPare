@@ -1,4 +1,5 @@
 import { productApi } from '@api'
+import { PRODUCT_CERTIFICATION_AGENCY } from '@constants/product'
 import type {
   Link,
   ProductLinksSetResponse,
@@ -29,7 +30,7 @@ export const PIP_KEYS = [
 
 export const REQUIRED_PIP_KEY = ['brand', 'owner', 'productName', 'image']
 
-export const REQUIRED_CERTIFICAITON_KEY = ['status']
+export const REQUIRED_CERTIFICAITON_KEY = ['status', 'license']
 
 export const getProductDataLinks = (
   data: ProductLinksSetResponse,
@@ -136,25 +137,10 @@ export const getProductInfoByGSLink = async (
 }
 
 export const getCertificationDataFromResponse = (data: any) => {
-  if (!data) {
+  if (!data || data === 'Ok') {
     return {
       sv: null,
       en: null,
-    }
-  }
-
-  if (data === 'Ok') {
-    return {
-      sv: {
-        status: 'Active',
-        license: '',
-        brand: false,
-      },
-      en: {
-        status: 'Active',
-        license: '',
-        brand: false,
-      },
     }
   }
 
@@ -162,15 +148,14 @@ export const getCertificationDataFromResponse = (data: any) => {
     const certificationDetails = data.value.certificationDetails[0]
 
     const certificaionInfo: any = {
-      sv: {
-        brand: true,
-      },
-      en: {
-        brand: true,
-      },
+      sv: {},
+      en: {},
     }
 
-    if (certificationDetails.certificationStatus.length > 0) {
+    if (
+      certificationDetails.certificationStatus &&
+      certificationDetails.certificationStatus.length > 0
+    ) {
       const statuses = certificationDetails.certificationStatus.filter(
         (status: any) => AVAILABLE_LANGUAGES.includes(status['@language']),
       )
@@ -187,9 +172,52 @@ export const getCertificationDataFromResponse = (data: any) => {
       }
     }
 
-    if (certificationDetails.certificationIdentification.length > 0) {
+    if (
+      certificationDetails.certificationAgency &&
+      certificationDetails.certificationAgency.length > 0
+    ) {
+      const agencies = certificationDetails.certificationAgency.filter(
+        (agency: any) => AVAILABLE_LANGUAGES.includes(agency['@language']),
+      )
+
+      for (const agency of agencies) {
+        const lang = agency['@language']
+        const value = agency['@value']
+
+        if (lang === 'se') {
+          Object.assign(certificaionInfo['sv'], { agency: value ? value : '' })
+        } else {
+          Object.assign(certificaionInfo[lang], { agency: value ? value : '' })
+        }
+      }
+    }
+
+    if (
+      certificationDetails.certificationSubject &&
+      certificationDetails.certificationSubject.length > 0
+    ) {
+      const subjects = certificationDetails.certificationSubject.filter(
+        (subject: any) => AVAILABLE_LANGUAGES.includes(subject['@language']),
+      )
+
+      for (const subject of subjects) {
+        const lang = subject['@language']
+        const value = subject['@value']
+
+        if (lang === 'se') {
+          Object.assign(certificaionInfo['sv'], { subject: value ? value : '' })
+        } else {
+          Object.assign(certificaionInfo[lang], { subject: value ? value : '' })
+        }
+      }
+    }
+
+    if (
+      certificationDetails.certificationIdentification &&
+      certificationDetails.certificationIdentification.length > 0
+    ) {
       const licenses = certificationDetails.certificationIdentification.filter(
-        (status: any) => AVAILABLE_LANGUAGES.includes(status['@language']),
+        (license: any) => AVAILABLE_LANGUAGES.includes(license['@language']),
       )
 
       for (const license of licenses) {
@@ -200,6 +228,26 @@ export const getCertificationDataFromResponse = (data: any) => {
           Object.assign(certificaionInfo['sv'], { license: value ? value : '' })
         } else {
           Object.assign(certificaionInfo[lang], { license: value ? value : '' })
+        }
+      }
+    }
+
+    if (
+      certificationDetails.referencedFileURL &&
+      certificationDetails.referencedFileURL.length > 0
+    ) {
+      const urls = certificationDetails.referencedFileURL.filter((url: any) =>
+        AVAILABLE_LANGUAGES.includes(url['@language']),
+      )
+
+      for (const url of urls) {
+        const lang = url['@language']
+        const value = url['@value']
+
+        if (lang === 'se') {
+          Object.assign(certificaionInfo['sv'], { url: value ? value : '' })
+        } else {
+          Object.assign(certificaionInfo[lang], { url: value ? value : '' })
         }
       }
     }
@@ -454,7 +502,15 @@ export const mapProductWithTypeGS = (pipData: any) => {
   }
 
   if (pipData.packagingMarkedLabelAccreditation) {
-    const value = pipData.packagingMarkedLabelAccreditation['@value']
+    let value = Array.isArray(pipData.packagingMarkedLabelAccreditation)
+      ? pipData.packagingMarkedLabelAccreditation[0].value ||
+        pipData.packagingMarkedLabelAccreditation[0]['@id']
+      : pipData.packagingMarkedLabelAccreditation.value ||
+        pipData.packagingMarkedLabelAccreditation['@id']
+
+    if (value.includes('gs1:PackagingMarkedLabelAccreditationCode-')) {
+      value = value.replace('gs1:PackagingMarkedLabelAccreditationCode-', '')
+    }
 
     Object.assign(productPip['en'], {
       markedLabel: value ? value : '',
@@ -687,11 +743,16 @@ export const mapProductWithTypeTobaccoProduct = (pipData: any) => {
     }
   }
 
-  if (
-    pipData.packagingMarkedLabelAccreditation &&
-    pipData.packagingMarkedLabelAccreditation.length > 0
-  ) {
-    const value = pipData.packagingMarkedLabelAccreditation[0].value
+  if (pipData.packagingMarkedLabelAccreditation) {
+    let value = Array.isArray(pipData.packagingMarkedLabelAccreditation)
+      ? pipData.packagingMarkedLabelAccreditation[0].value ||
+        pipData.packagingMarkedLabelAccreditation[0]['@id']
+      : pipData.packagingMarkedLabelAccreditation.value ||
+        pipData.packagingMarkedLabelAccreditation['@id']
+
+    if (value.includes('gs1:PackagingMarkedLabelAccreditationCode-')) {
+      value = value.replace('gs1:PackagingMarkedLabelAccreditationCode-', '')
+    }
 
     Object.assign(productPip['en'], {
       markedLabel: value ? value : '',
@@ -727,5 +788,17 @@ export const isAvailableCertification = (data: any) => {
     }
   }
 
+  if (data.status !== 'ACTIVE') {
+    return false
+  }
+
   return available
+}
+
+export const isProjectCertificationName = (name: string): boolean => {
+  if (name.toLowerCase() === PRODUCT_CERTIFICATION_AGENCY.toLowerCase()) {
+    return true
+  }
+
+  return false
 }

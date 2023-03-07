@@ -491,7 +491,7 @@
 				DEVELOPMENT_TEAM = 2T94CF8825;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = ProPare/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ProPare;
+				INFOPLIST_KEY_CFBundleDisplayName = "Product Passport Resolver";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -518,7 +518,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2T94CF8825;
 				INFOPLIST_FILE = ProPare/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ProPare;
+				INFOPLIST_KEY_CFBundleDisplayName = "Product Passport Resolver";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
