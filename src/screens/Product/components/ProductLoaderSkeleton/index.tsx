@@ -1,12 +1,8 @@
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder'
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import tw from '@tools/tailwind'
 
-interface ProductLoaderSkeletonProps {
-  barcode: string
-}
-
-const ProductLoaderSkeleton = ({ barcode }: ProductLoaderSkeletonProps) => {
+const ProductLoaderSkeleton = () => {
   return (
     <View style={tw`flex-1 bg-white`}>
       <View style={tw`grow`}>
@@ -96,11 +92,7 @@ const ProductLoaderSkeleton = ({ barcode }: ProductLoaderSkeletonProps) => {
           </SkeletonPlaceholder.Item>
         </SkeletonPlaceholder>
       </View>
-      <View style={tw`w-full items-center justify-center py-[14px]`}>
-        <Text
-          style={tw`text-light_blue text-base font-light`}
-        >{`<<<<GTIN${barcode}<<<<`}</Text>
-      </View>
+      <View style={tw`w-full items-center justify-center py-[14px]`} />
     </View>
   )
 }

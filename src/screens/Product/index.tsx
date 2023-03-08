@@ -37,7 +37,7 @@ const ProductScreen = () => {
   }, [query.isSuccess])
 
   if (query.isLoading) {
-    return <ProductLoaderSkeleton barcode={code} />
+    return <ProductLoaderSkeleton />
   }
 
   return (
@@ -202,9 +202,17 @@ const ProductScreen = () => {
           </ScrollView>
         )}
       <View style={tw`w-full items-center justify-center py-[14px]`}>
-        <Text
-          style={tw`text-light_blue text-base font-light`}
-        >{`<<<<GTIN${code}<<<<`}</Text>
+        {!query.isLoading && (
+          <Text style={tw`text-light_blue text-base font-light`}>
+            {`<<<<GTIN${
+              query.isSuccess &&
+              query.data.type === 'SUCCESS' &&
+              (query.data.pip.enAvailable || query.data.pip.svAvailable)
+                ? code
+                : '_NotFound'
+            }<<<<`}
+          </Text>
+        )}
       </View>
     </View>
   )
