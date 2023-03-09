@@ -6,6 +6,7 @@ import type { RootRouterScreenProps } from '@navigation/RootRouter'
 import Label from '@uikit/molecules/rows/Label'
 import { useTranslation } from 'react-i18next'
 import { getCodeByBarcode } from '@tools/barcode'
+import { SvgFromUri } from 'react-native-svg'
 
 const CertificationScreen = () => {
   const { t } = useTranslation()
@@ -28,7 +29,13 @@ const CertificationScreen = () => {
           <Text style={tw`font-bold text-2xl`}>
             {`${query.data.pip[params.language].markedLabel}`}
           </Text>
-          {query.data.certification[params.language].url && (
+          {query.data.certification[params.language].url &&
+          query.data.certification[params.language].url?.includes('.svg') ? (
+            <SvgFromUri
+              style={tw`absolute w-[70px] h-[56px] top-[10px] right-[30px]`}
+              uri={query.data.certification[params.language].url!}
+            />
+          ) : (
             <Image
               source={{
                 uri: query.data.certification[params.language].url,
