@@ -179,10 +179,10 @@ const ProductScreen = () => {
                     value={`${
                       language === 'en'
                         ? query.data.certification.enAvailable
-                          ? query.data.pip[language].markedLabel
+                          ? 'Nordic Swan Ecolabel'
                           : t('screens.product.labels.not_certification')
                         : query.data.certification.svAvailable
-                        ? query.data.pip[language].markedLabel
+                        ? 'Svanenmärkt'
                         : t('screens.product.labels.not_certification')
                     }`}
                     isButton={

@@ -26,13 +26,10 @@ const CertificationScreen = () => {
           style={tw`p-[24px] h-[180px] items-center justify-center`}
           source={require('@assets/images/background.png')}
         >
-          <Text style={tw`font-bold text-2xl`}>
-            {`${query.data.pip[params.language].markedLabel}`}
-          </Text>
           {query.data.certification[params.language].url &&
           query.data.certification[params.language].url?.includes('.svg') ? (
             <SvgFromUri
-              style={tw`absolute w-[70px] h-[56px] top-[10px] right-[30px]`}
+              style={tw`w-[80px] h-[80px]`}
               uri={query.data.certification[params.language].url!}
             />
           ) : (
@@ -40,7 +37,8 @@ const CertificationScreen = () => {
               source={{
                 uri: query.data.certification[params.language].url,
               }}
-              style={tw`absolute w-[70px] h-[56px] top-[10px] right-[30px]`}
+              resizeMode="contain"
+              style={tw`w-[80px] h-[80px]`}
             />
           )}
         </ImageBackground>
