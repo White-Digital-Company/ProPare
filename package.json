@@ -6,18 +6,17 @@
     "// --- develop --- //": "",
     "bootstrap": "yarn && cd ios && npx pod install && cd ../",
     "dev": "react-native start",
-    "adb": "wd-adb",
+    "adb": "(adb reverse tcp:8081 tcp:8081 || true) && (adb reverse tcp:7007 tcp:7007 || true)",
     "android": "adb shell pm uninstall --user 0 com.whitedigital.propare ; react-native run-android",
     "ios": "react-native run-ios --simulator='iPhone 12 (15.0)'",
     "// --- build --- //": "",
     "// --- test --- //": "",
     "test": "jest --passWithNoTests",
     "// --- tools --- //": "",
-    "assets": "wd-assets",
-    "prettify": "wd-prettify",
+    "format": "prettier --write '**/*.(ts|tsx)'",
     "pull": "git pull origin develop",
     "// --- linters --- //": "",
-    "validate": "wd-validate"
+    "validate": "tsc && yarn lint && pretty-quick --staged"
   },
   "dependencies": {
     "@freakycoder/react-native-helpers": "^1.0.1",
